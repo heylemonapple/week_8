@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>소원 이야기</title>
+
+    <style>
+        /* 기본 스타일 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            background-color: black;
+            color: black;
+            font-family: 'Press Start 2P', cursive; /* 픽셀 느낌의 폰트 적용 */
+        }
+        .background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+        }
+        .content, .button, .text {
+            position: absolute;
+            text-align: center;
+        }
+        .button {
+            font-size: 24px; /* 버튼 텍스트 크기 증가 */
+            padding: 12px 24px;
+            cursor: pointer;
+            background-color: white;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            font-family: 'Press Start 2P', cursive;
+        }
+        .hidden {
+            display: none;
+        }
+        #textDisplay {
+            bottom: 20px;
+            font-size: 24px; /* 텍스트 크기 증가 */
+            background-color: white;
+            color: black;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Press Start 2P', cursive;
+        }
+        #rabbit {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 150px;
+            height: auto;
+        }
+        #whiteButton, #blackButton {
+            position: absolute;
+            bottom: 100px;
+        }
+        #blackButton {
+            left: 50px;
+        }
+        #whiteButton {
+            right: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 배경 설정 -->
+    <div id="background" class="background" style="background-image: url('이미지1.png');"></div>
+    
+    <!-- 시작 버튼 -->
+    <button id="startButton" class="button">시작</button>
+
+    <!-- 텍스트와 버튼을 표시하는 영역 -->
+    <div id="textDisplay" class="text hidden"></div>
+    <button id="responseButton" class="button hidden">응</button>
+    <button id="helpButton" class="button hidden">도와줄게</button>
+    <button id="whiteButton" class="button hidden">흰색</button>
+    <button id="blackButton" class="button hidden">검정색</button>
+    <button id="resetButton" class="button hidden">처음으로</button>
+
+    <!-- 토끼 캐릭터 이미지 -->
+    <img id="rabbit" src="토끼오른쪽.GIF" class="hidden" alt="토끼 캐릭터">
+
+    <script>
+        let step = 0;
+        let rabbitPosition = 0;
+        let lastKey = '';
+
+        // 시작 버튼 클릭
+        document.getElementById('startButton').onclick = function() {
+            step++;
+            this.classList.add('hidden');
+            displayText("있지.. 나는 소원이 있어.. 들어줄래?", 4000, showResponseButton);
+        };
+
+        // 응 버튼 클릭
+        document.getElementById('responseButton').onclick = function() {
+            step++;
+            this.classList.add('hidden');
+            changeBackground("이미지2.png");
+            displayText("나는 달에 가고싶어", 2000, () => {
+                displayText("오늘 밤이 마지막 기회야. 도와줄래?", 2000, showHelpButton);
+            });
+        };
+
+        // 텍스트 출력 함수
+        function displayText(text, duration, callback) {
+            const textDisplay = document.getElementById('textDisplay');
+            textDisplay.innerHTML = text;
+            textDisplay.classList.remove('hidden');
+            setTimeout(() => {
+                textDisplay.classList.add('hidden');
+                if (callback) callback();
+            }, duration);
+        }
+
+        // 배경 변경 함수
+        function changeBackground(image) {
+            document.getElementById('background').style.backgroundImage = `url(${image})`;
+        }
+
+        // 응 버튼 표시
+        function showResponseButton() {
+            document.getElementById('responseButton').classList.remove('hidden');
+        }
+
+        // 도와줄게 버튼 표시하기
+        function showHelpButton() {
+            document.getElementById('helpButton').classList.remove('hidden');
+        }
+
+        // '도와줄게' 버튼 클릭 시
+        document.getElementById('helpButton').onclick = function() {
+            step++;
+            this.classList.add('hidden');
+            changeBackground("이미지3.png");
+            setTimeout(showRabbit, 1000); // 1초 후에 토끼 등장
+        };
+
+        // 토끼 캐릭터 등장 함수
+        function showRabbit() {
+            const rabbit = document.getElementById('rabbit');
+            rabbit.classList.remove('hidden');
+            rabbit.src = "토끼오른쪽.GIF";
+            window.addEventListener('keydown', moveRabbit);  // 키보드 이벤트 추가
+        }
+
+        // 토끼 움직임 함수
+        function moveRabbit(event) {
+            const rabbit = document.getElementById('rabbit');
+            if (event.key === 'ArrowRight') {
+                rabbitPosition += 20;
+                lastKey = 'right';
+                rabbit.src = "토끼오른쪽.GIF";
+                rabbit.style.left = rabbitPosition + 'px';
+            } else if (event.key === 'ArrowLeft') {
+                rabbitPosition -= 20;
+                lastKey = 'left';
+                rabbit.src = "토끼왼쪽.GIF";
+                rabbit.style.left = rabbitPosition + 'px';
+            }
+
+            if (rabbitPosition >= window.innerWidth / 2 - 50) {
+                window.removeEventListener('keydown', moveRabbit);
+                if (lastKey === 'right') rabbit.src = "토끼오른쪽멈춤.png";
+                else rabbit.src = "토끼왼쪽멈춤.png";
+                displayText("어? 달조각이다!", 3000, showNextBackground);
+            }
+        }
+
+        // 다음 배경으로 전환
+        function showNextBackground() {
+            changeBackground("이미지4.png");
+            document.getElementById('rabbit').classList.add('hidden');
+            displayText("달조각을 다 모으면 달에 갈 수 있대", 3000, () => {
+                changeBackground("이미지5.png");
+                displayText("더 걸어가보자", 3000, () => {
+                    changeBackground("이미지6.png");
+                    displayText("어? 고양이다", 3000, () => {
+                        changeBackground("이미지7.png");
+                        displayText("안녕?", 3000, () => {
+                            displayText("너 달조각 모으는거 같은데", 3000, () => {
+                                displayText("퀴즈를 맞추면 내 달조각을 줄게", 3000, () => {
+                                    displayText("다음 중 고양이의 색은?", 3000, showQuizButtons);
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        }
+
+        // 퀴즈 버튼 표시 함수
+        function showQuizButtons() {
+            document.getElementById('whiteButton').classList.remove('hidden');
+            document.getElementById('blackButton').classList.remove('hidden');
+        }
+
+        // 흰색 버튼 클릭 이벤트 (정답)
+        document.getElementById('whiteButton').onclick = function() {
+            changeBackground("이미지8.png");
+            hideQuizButtons();
+            displayText("달조각이다!", 2000, nextStep);
+        };
+
+        // 검정색 버튼 클릭 이벤트 (오답)
+        document.getElementById('blackButton').onclick = function() {
+            hideQuizButtons();
+            displayText("땡! 다시 맞춰봐", 2000, showQuizButtons);
+        };
+
+        // 퀴즈 버튼 숨김 처리 함수
+        function hideQuizButtons() {
+            document.getElementById('whiteButton').classList.add('hidden');
+            document.getElementById('blackButton').classList.add('hidden');
+        }
+
+        // 이미지9 이후 단계
+        function nextStep() {
+            changeBackground("이미지9.png");
+            displayText("더 걸어가보자", 2000, () => {
+                changeBackground("이미지10.png");
+                setTimeout(showRabbitAgain, 1000); // 1초 후에 토끼 등장
+            });
+        }
+
+        // 토끼 재등장 함수
+        function showRabbitAgain() {
+            const rabbit = document.getElementById('rabbit');
+            rabbit.classList.remove('hidden');
+            rabbit.src = "토끼오른쪽.GIF";
+            rabbit.style.left = '0px';
+            window.addEventListener('keydown', moveRabbitAgain);
+        }
+
+        // 토끼 두 번째 움직임 함수
+        function moveRabbitAgain(event) {
+            const rabbit = document.getElementById('rabbit');
+            if (event.key === 'ArrowRight') {
+                rabbitPosition += 20;
+                lastKey = 'right';
+                rabbit.src = "토끼오른쪽.GIF";
+                rabbit.style.left = rabbitPosition + 'px';
+            } else if (event.key === 'ArrowLeft') {
+                rabbitPosition -= 20;
+                lastKey = 'left';
+                rabbit.src = "토끼왼쪽.GIF";
+                rabbit.style.left = rabbitPosition + 'px';
+            }
+
+            if (rabbitPosition >= window.innerWidth / 2 - 50) {
+                window.removeEventListener('keydown', moveRabbitAgain);
+                if (lastKey === 'right') rabbit.src = "토끼오른쪽멈춤.png";
+                else rabbit.src = "토끼왼쪽멈춤.png";
+                displayText("어? 달조각이다!", 3000, showFinalBackground);
+            }
+        }
+
+        // 최종 이미지 전환 함수
+        function showFinalBackground() {
+            changeBackground("이미지11.png");
+            document.getElementById('rabbit').classList.add('hidden');
+            displayText("달조각이다!", 3000, () => {
+                changeBackground("이미지12.png");
+                displayText("달조각을 3개 모았다", 2000, () => {
+                    displayText("이제 달에 갈 수 있어!", 2000, () => {
+                        changeBackground("이미지13.png");
+                        setTimeout(() => {
+                            changeBackground("이미지14.png");
+                            displayText("고마워, 이제 편하게 잘 수 있을 거 같아", 3000, () => {
+                                changeBackground("이미지15.png");
+                                setTimeout(showResetButton, 3000); // 이미지15 전환 후 2초 대기 후 리셋 버튼 표시
+                            });
+                        }, 5000);
+                    });
+                });
+            });
+        }
+
+        // 리셋 버튼 표시 함수
+        function showResetButton() {
+            document.getElementById('resetButton').classList.remove('hidden');
+        }
+
+        // 리셋 버튼 클릭 시 페이지 리셋
+        document.getElementById('resetButton').onclick = function() {
+            location.reload();
+        };
+
+    </script>
+</body>
+</html>
+
